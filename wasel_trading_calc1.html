@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wasel Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --accent:#00E5A0; --accent-glow:rgba(0,229,160,0.15); --accent-border:rgba(0,229,160,0.4);
+  --bg:#06111F; --card:rgba(10,25,50,0.7); --silver:#9BB0C8; --text:#E8F0FA;
+  --dim:rgba(255,255,255,0.06); --gc:0,229,160;
+}
+body { font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; transition:background 0.5s; }
+body::before { content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background: radial-gradient(ellipse at 15% 85%,rgba(var(--gc),0.07) 0%,transparent 55%),
+              radial-gradient(ellipse at 85% 15%,rgba(var(--gc),0.05) 0%,transparent 55%);
+  transition:background 0.5s; }
+body::after { content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background-image: linear-gradient(rgba(var(--gc),0.025) 1px,transparent 1px),
+                    linear-gradient(90deg,rgba(var(--gc),0.025) 1px,transparent 1px);
+  background-size:44px 44px; transition:all 0.5s; }
+body.m-safe  { --accent:#00E5A0; --accent-glow:rgba(0,229,160,0.14); --accent-border:rgba(0,229,160,0.4); --gc:0,229,160; }
+body.m-mid   { --accent:#F0C96B; --accent-glow:rgba(240,201,107,0.14); --accent-border:rgba(240,201,107,0.4); --gc:240,201,107; }
+body.m-high  { --accent:#FF6B8A; --accent-glow:rgba(255,107,138,0.14); --accent-border:rgba(255,107,138,0.4); --gc:255,107,138; }
+
+.screen { display:none; }
+.screen.on { display:block; }
+
+/* ═══════════ WELCOME ═══════════ */
+#sw { position:relative; z-index:1; min-height:100vh; display:none; flex-direction:column; align-items:center; justify-content:center; padding:40px 20px; }
+#sw.on { display:flex; }
+.wlogo { text-align:center; margin-bottom:44px; }
+.wring { width:76px; height:76px; border-radius:50%; margin:0 auto 14px; background:linear-gradient(135deg,#0D47A1,#1565C0); border:2px solid rgba(0,229,160,0.5); display:flex; align-items:center; justify-content:center; font-size:32px; box-shadow:0 0 40px rgba(0,229,160,0.2); animation:pr 3s ease infinite; }
+@keyframes pr{0%,100%{box-shadow:0 0 30px rgba(0,229,160,0.2);}50%{box-shadow:0 0 60px rgba(0,229,160,0.4);}}
+.wlogo h1 { font-size:26px; font-weight:900; letter-spacing:3px; background:linear-gradient(90deg,#F0C96B,#C9A84C); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.wlogo p { font-size:11px; color:var(--silver); letter-spacing:2px; margin-top:4px; }
+.wq { font-size:17px; font-weight:700; text-align:center; margin-bottom:8px; }
+.ws { font-size:12px; color:var(--silver); text-align:center; margin-bottom:36px; line-height:1.7; }
+
+.mcards { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; max-width:840px; width:100%; }
+.mc { background:rgba(10,25,50,0.65); border:1.5px solid rgba(255,255,255,0.07); border-radius:20px; padding:28px 18px; cursor:pointer; text-align:center; transition:all 0.35s cubic-bezier(0.34,1.2,0.64,1); position:relative; overflow:hidden; }
+.mc::after { content:''; position:absolute; inset:0; opacity:0; border-radius:20px; transition:opacity 0.3s; }
+.mc.s::after { background:radial-gradient(circle at 50% 0%,rgba(0,229,160,0.14) 0%,transparent 70%); }
+.mc.m::after { background:radial-gradient(circle at 50% 0%,rgba(240,201,107,0.14) 0%,transparent 70%); }
+.mc.h::after { background:radial-gradient(circle at 50% 0%,rgba(255,107,138,0.14) 0%,transparent 70%); }
+.mc:hover::after { opacity:1; }
+.mc:hover { transform:translateY(-6px); }
+.mc.s:hover { border-color:rgba(0,229,160,0.5); box-shadow:0 20px 60px rgba(0,229,160,0.14); }
+.mc.m:hover { border-color:rgba(240,201,107,0.5); box-shadow:0 20px 60px rgba(240,201,107,0.14); }
+.mc.h:hover { border-color:rgba(255,107,138,0.5); box-shadow:0 20px 60px rgba(255,107,138,0.14); }
+.mc-ico { font-size:42px; margin-bottom:12px; display:block; }
+.mc-nm { font-size:17px; font-weight:900; margin-bottom:6px; }
+.mc.s .mc-nm { color:#00E5A0; } .mc.m .mc-nm { color:#F0C96B; } .mc.h .mc-nm { color:#FF6B8A; }
+.mc-rng { display:inline-block; font-family:'Rajdhani',sans-serif; font-size:13px; font-weight:700; padding:3px 13px; border-radius:20px; margin-bottom:10px; }
+.mc.s .mc-rng { background:rgba(0,229,160,0.1); color:#00E5A0; border:1px solid rgba(0,229,160,0.3); }
+.mc.m .mc-rng { background:rgba(240,201,107,0.1); color:#F0C96B; border:1px solid rgba(240,201,107,0.3); }
+.mc.h .mc-rng { background:rgba(255,107,138,0.1); color:#FF6B8A; border:1px solid rgba(255,107,138,0.3); }
+.mc-desc { font-size:11px; color:var(--silver); line-height:1.7; margin-bottom:12px; }
+.mc-traits { display:flex; flex-direction:column; gap:5px; }
+.mc-tr { font-size:10px; background:rgba(255,255,255,0.04); border-radius:6px; padding:4px 8px; color:rgba(200,220,240,0.65); }
+
+/* ═══════════ DASHBOARD ═══════════ */
+#sd { position:relative; z-index:1; max-width:1080px; margin:0 auto; padding:18px 16px; }
+
+.topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid var(--dim); }
+.tl { display:flex; align-items:center; gap:10px; }
+.bbtn { background:rgba(255,255,255,0.05); border:1px solid var(--dim); border-radius:10px; padding:7px 12px; cursor:pointer; color:var(--silver); font-size:12px; font-family:'Cairo',sans-serif; transition:all 0.2s; }
+.bbtn:hover { background:rgba(255,255,255,0.09); color:var(--text); }
+.mpill { display:flex; align-items:center; gap:7px; background:var(--accent-glow); border:1.5px solid var(--accent-border); border-radius:20px; padding:6px 14px; transition:all 0.4s; }
+.mpill .pi { font-size:17px; }
+.mpill .pn { font-size:13px; font-weight:700; color:var(--accent); transition:color 0.4s; }
+.mpill .pr2 { font-size:10px; color:var(--silver); margin-right:4px; }
+.tr { display:flex; align-items:center; gap:7px; }
+.ldot { width:7px; height:7px; border-radius:50%; background:var(--accent); animation:bl 1.4s ease infinite; transition:background 0.4s; }
+@keyframes bl{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.ltxt { font-size:10px; color:var(--accent); font-weight:700; letter-spacing:1px; transition:color 0.4s; }
+
+.toprow { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:14px; }
+.ic { background:var(--card); border:1px solid var(--dim); border-radius:14px; padding:14px 15px; backdrop-filter:blur(12px); transition:border-color 0.4s; }
+.ic:hover { border-color:var(--accent-border); }
+.ilbl { font-size:9px; color:var(--silver); letter-spacing:1.5px; text-transform:uppercase; margin-bottom:7px; font-weight:700; }
+.ic input[type=number] { background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.08); border-radius:8px; color:var(--accent); font-family:'Cairo',sans-serif; font-size:19px; font-weight:900; width:100%; padding:7px 11px; outline:none; transition:border-color 0.3s, color 0.4s; }
+.ic input[type=number]:focus { border-color:var(--accent); }
+.sr { display:flex; align-items:center; gap:9px; }
+.ic input[type=range] { flex:1; height:5px; cursor:pointer; accent-color:var(--accent); }
+.sv { font-size:20px; font-weight:900; font-family:'Rajdhani',sans-serif; color:var(--accent); min-width:46px; text-align:center; transition:color 0.4s; }
+
+.atabs { display:flex; gap:7px; flex-wrap:wrap; margin-bottom:14px; }
+.atab { background:rgba(10,25,50,0.5); border:1px solid var(--dim); border-radius:20px; padding:5px 13px; font-size:11px; font-weight:700; cursor:pointer; color:var(--silver); font-family:'Cairo',sans-serif; transition:all 0.25s; }
+.atab:hover,.atab.on { background:var(--accent-glow); border-color:var(--accent-border); color:var(--accent); }
+
+.kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:11px; margin-bottom:14px; }
+.kc { background:var(--card); border:1px solid var(--dim); border-radius:14px; padding:13px 14px; text-align:center; backdrop-filter:blur(12px); }
+.kl { font-size:9px; color:var(--silver); letter-spacing:1.5px; text-transform:uppercase; margin-bottom:5px; font-weight:700; }
+.kv { font-size:21px; font-weight:900; font-family:'Rajdhani',sans-serif; color:var(--accent); transition:color 0.4s; }
+.ks { font-size:9px; color:var(--silver); margin-top:2px; }
+
+.ltgrid { display:grid; grid-template-columns:1fr 1fr; gap:13px; margin-bottom:14px; }
+.panel { background:var(--card); border:1px solid var(--dim); border-radius:16px; padding:16px; backdrop-filter:blur(12px); transition:border-color 0.4s; }
+.ptitle { font-size:10px; font-weight:700; color:var(--accent); letter-spacing:1.5px; text-transform:uppercase; margin-bottom:13px; transition:color 0.4s; }
+
+/* lot rows */
+.lot-row { display:flex; align-items:center; justify-content:space-between; padding:9px 0; border-bottom:1px solid var(--dim); }
+.lot-row:last-child { border-bottom:none; }
+.lrl { display:flex; align-items:center; gap:8px; }
+.lico { font-size:17px; }
+.lnm { font-size:12px; font-weight:700; }
+.lra { font-size:10px; color:var(--silver); margin-top:1px; }
+.lv { font-size:21px; font-weight:900; font-family:'Rajdhani',sans-serif; }
+.lvs { font-size:9px; color:var(--silver); text-align:left; }
+
+/* target panel */
+.trow { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-bottom:11px; }
+.ti { background:rgba(0,0,0,0.2); border-radius:10px; padding:11px; text-align:center; border:1px solid var(--dim); }
+.til { font-size:9px; color:var(--silver); letter-spacing:1px; text-transform:uppercase; margin-bottom:3px; }
+.tiv { font-size:19px; font-weight:900; font-family:'Rajdhani',sans-serif; }
+.cg { color:#00E5A0; } .cr { color:#FF6B8A; }
+
+.tfbtn { width:100%; background:var(--accent-glow); border:1.5px solid var(--accent-border); border-radius:11px; padding:12px; font-family:'Cairo',sans-serif; font-size:13px; font-weight:700; color:var(--accent); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:7px; transition:all 0.3s; }
+.tfbtn:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(var(--gc),0.28); }
+
+.cpanel { margin-bottom:14px; }
+.tpanel { margin-bottom:18px; overflow:hidden; padding:0; }
+.throw { padding:12px 16px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--dim); }
+.throw h3 { font-size:11px; font-weight:700; color:var(--accent); letter-spacing:1px; text-transform:uppercase; transition:color 0.4s; }
+.tbadge { font-size:10px; color:var(--accent); background:var(--accent-glow); border:1px solid var(--accent-border); border-radius:20px; padding:3px 11px; transition:all 0.4s; }
+table { width:100%; border-collapse:collapse; }
+thead th { background:rgba(0,0,0,0.2); padding:8px 12px; text-align:center; color:var(--silver); font-size:9px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; }
+tbody tr { border-bottom:1px solid rgba(255,255,255,0.03); transition:background 0.15s; }
+tbody tr:hover { background:rgba(var(--gc),0.04); }
+td { padding:7px 12px; text-align:center; font-family:'Rajdhani',sans-serif; font-weight:600; font-size:13px; }
+.tdl { font-family:'Cairo',sans-serif; font-size:10px; color:var(--silver); font-weight:600; }
+.tdc { color:var(--text); }
+.tdr { color:var(--accent); transition:color 0.4s; }
+.tdp { color:#00E5A0; }
+.tdlt { color:var(--accent); font-size:12px; opacity:0.8; transition:color 0.4s; }
+.tdt { color:var(--accent); font-weight:700; transition:color 0.4s; }
+.wsep { background:rgba(var(--gc),0.05); font-size:9px; color:var(--accent); letter-spacing:1px; font-family:'Cairo',sans-serif; transition:all 0.4s; }
+
+.disc { text-align:center; font-size:10px; color:rgba(155,176,200,0.38); padding:4px 20px 18px; line-height:1.6; }
+
+/* ═══════════ EMOTION ═══════════ */
+.eov { display:none; position:fixed; inset:0; z-index:1000; background:rgba(4,10,22,0.88); backdrop-filter:blur(10px); align-items:center; justify-content:center; }
+.eov.on { display:flex; }
+.emod { background:linear-gradient(145deg,#0B1D3A,#081428); border:1.5px solid var(--accent-border); border-radius:24px; padding:38px 30px; max-width:420px; width:90%; text-align:center; position:relative; box-shadow:0 0 80px rgba(var(--gc),0.2); animation:mp 0.45s cubic-bezier(0.34,1.5,0.64,1) both; transition:border-color 0.4s, box-shadow 0.4s; }
+@keyframes mp{from{transform:scale(0.6);opacity:0;}to{transform:scale(1);opacity:1;}}
+.ecl { position:absolute; top:11px; left:11px; background:rgba(255,255,255,0.06); border:none; border-radius:50%; width:28px; height:28px; cursor:pointer; color:var(--silver); font-size:13px; display:flex; align-items:center; justify-content:center; }
+.ecl:hover { background:rgba(255,107,138,0.2); color:#FF6B8A; }
+.eemj { font-size:56px; display:block; margin-bottom:9px; animation:eb 0.9s ease infinite alternate; }
+@keyframes eb{from{transform:translateY(0)}to{transform:translateY(-9px)}}
+.etitle { font-size:22px; font-weight:900; color:var(--accent); margin-bottom:5px; transition:color 0.4s; }
+.esub { font-size:12px; color:var(--silver); line-height:1.7; margin-bottom:16px; }
+.estats { display:flex; gap:9px; justify-content:center; margin-bottom:14px; }
+.estat { background:var(--accent-glow); border:1px solid var(--accent-border); border-radius:10px; padding:9px 14px; transition:all 0.4s; }
+.esv2 { font-size:18px; font-weight:900; font-family:'Rajdhani',sans-serif; color:var(--accent); transition:color 0.4s; }
+.esl2 { font-size:9px; color:var(--silver); letter-spacing:1px; }
+.equote { font-size:11px; color:rgba(155,176,200,0.6); border-top:1px solid var(--dim); padding-top:13px; line-height:1.7; font-style:italic; }
+
+canvas#cc { position:fixed; inset:0; pointer-events:none; z-index:999; }
+
+@media(max-width:700px){
+  .mcards{grid-template-columns:1fr;}
+  .toprow{grid-template-columns:1fr 1fr;}
+  .toprow .ic:last-child{grid-column:span 2;}
+  .kpis{grid-template-columns:1fr 1fr;}
+  .ltgrid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body class="m-safe">
+
+<!-- ═══ WELCOME ═══ -->
+<div id="sw" class="screen on">
+  <div class="wlogo">
+    <div class="wring">&#x20A9;</div>
+    <h1>WASEL PRO</h1>
+    <p>&#x622;&#x644;&#x629; &#x627;&#x644;&#x631;&#x628;&#x62D; &#x627;&#x644;&#x62A;&#x631;&#x627;&#x643;&#x645;&#x64A; &#x644;&#x644;&#x645;&#x62A;&#x62F;&#x627;&#x648;&#x644;</p>
+  </div>
+  <div class="wq">ما هو نمط تداولك؟</div>
+  <div class="ws">اختر نمطك — الداشبورد بالكامل سيتكيف معك: الخطة، اللوت، التارقت، الألوان، كل شي.</div>
+  <div class="mcards">
+
+    <div class="mc s" onclick="enterMode('safe')">
+      <span class="mc-ico">&#x1F6E1;&#xFE0F;</span>
+      <div class="mc-nm">آمن</div>
+      <div class="mc-rng">0.5% – 1% / يوم</div>
+      <div class="mc-desc">لحماية رأس المال وبناء الثروة بصبر. الانضباط أولاً.</div>
+      <div class="mc-traits">
+        <div class="mc-tr">&#x2714; مخاطرة منخفضة جداً</div>
+        <div class="mc-tr">&#x2714; لوت صغير — حساب محمي</div>
+        <div class="mc-tr">&#x2714; نمو تدريجي مستدام</div>
+      </div>
+    </div>
+
+    <div class="mc m" onclick="enterMode('mid')">
+      <span class="mc-ico">&#x2696;&#xFE0F;</span>
+      <div class="mc-nm">متوسط</div>
+      <div class="mc-rng">1% – 2% / يوم</div>
+      <div class="mc-desc">التوازن المثالي بين العائد والمخاطرة للمتداول الواعي.</div>
+      <div class="mc-traits">
+        <div class="mc-tr">&#x2714; عائد معقول بمخاطرة محسوبة</div>
+        <div class="mc-tr">&#x2714; لوت متوسط — فرصة أكبر</div>
+        <div class="mc-tr">&#x2714; مناسب لجميع الأصول</div>
+      </div>
+    </div>
+
+    <div class="mc h" onclick="enterMode('high')">
+      <span class="mc-ico">&#x1F525;</span>
+      <div class="mc-nm">عالي المخاطرة</div>
+      <div class="mc-rng">2% – 3.5% / يوم</div>
+      <div class="mc-desc">للمتداول المتمرس. عوائد أعلى، مخاطر أعلى. الضبط إلزامي.</div>
+      <div class="mc-traits">
+        <div class="mc-tr">&#x26A0; لوت أكبر — تقلبات حادة</div>
+        <div class="mc-tr">&#x26A0; يتطلب خبرة وانضباط عالي</div>
+        <div class="mc-tr">&#x26A0; حد الخسارة اليومي أساسي</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ DASHBOARD ═══ -->
+<div id="sd" class="screen">
+
+  <div class="topbar">
+    <div class="tl">
+      <button class="bbtn" onclick="goBack()">&#x2190; تغيير النمط</button>
+      <div class="mpill">
+        <span class="pi" id="pi">&#x1F6E1;&#xFE0F;</span>
+        <span class="pn" id="pn">آمن</span>
+        <span class="pr2" id="pr2">0.5%–1%/يوم</span>
+      </div>
+    </div>
+    <div class="tr">
+      <div class="ldot"></div>
+      <div class="ltxt">LIVE CALC</div>
+    </div>
+  </div>
+
+  <div class="toprow">
+    <div class="ic">
+      <div class="ilbl">&#x1F4B0; رأس المال ($)</div>
+      <input type="number" id="capital" value="300" min="10" step="10" oninput="calc()">
+    </div>
+    <div class="ic">
+      <div class="ilbl">&#x1F4C5; عدد الأسابيع</div>
+      <div class="sr">
+        <input type="range" id="weeks" min="1" max="12" value="4" oninput="document.getElementById('wv').textContent=this.value;calc()">
+        <span class="sv" id="wv">4</span>
+      </div>
+    </div>
+    <div class="ic">
+      <div class="ilbl">&#x1F4C8; نمو أسبوعي (%)</div>
+      <div class="sr">
+        <input type="range" id="growth" min="0" max="30" value="10" oninput="document.getElementById('gv').textContent=this.value+'%';calc()">
+        <span class="sv" id="gv">10%</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="atabs">
+    <button class="atab on" onclick="setAsset(this,'XAU/USD ذهب')">&#x1F947; ذهب</button>
+    <button class="atab" onclick="setAsset(this,'XAG/USD فضة')">&#x1F948; فضة</button>
+    <button class="atab" onclick="setAsset(this,'WTI نفط')">&#x1F6E2;&#xFE0F; نفط</button>
+    <button class="atab" onclick="setAsset(this,'EUR/USD')">&#x1F4B1; EUR/USD</button>
+    <button class="atab" onclick="setAsset(this,'GBP/USD')">&#x1F4B1; GBP/USD</button>
+    <button class="atab" onclick="setAsset(this,'USD/JPY')">&#x1F4B1; USD/JPY</button>
+  </div>
+
+  <div class="kpis">
+    <div class="kc"><div class="kl">رأس المال النهائي</div><div class="kv" id="kf">$0</div><div class="ks">بعد الفترة</div></div>
+    <div class="kc"><div class="kl">إجمالي الربح</div><div class="kv" style="color:#00E5A0" id="kp">$0</div><div class="ks">صافي الأرباح</div></div>
+    <div class="kc"><div class="kl">عائد ROI</div><div class="kv" id="kr">0%</div><div class="ks">الكلي</div></div>
+    <div class="kc"><div class="kl">أفضل يوم</div><div class="kv" id="kb">$0</div><div class="ks">أعلى ربح يومي</div></div>
+  </div>
+
+  <div class="ltgrid">
+    <div class="panel">
+      <div class="ptitle">&#x1F4D0; حجم اللوت المناسب</div>
+      <div id="lotrows"></div>
+    </div>
+    <div class="panel">
+      <div class="ptitle">&#x1F3AF; إدارة اليوم</div>
+      <div class="trow">
+        <div class="ti"><div class="til">التارقت اليومي</div><div class="tiv cg" id="tt">$0</div></div>
+        <div class="ti"><div class="til">حد الخسارة</div><div class="tiv cr" id="ts">-$0</div></div>
+        <div class="ti"><div class="til">نسبة المخاطرة</div><div class="tiv" id="trp" style="color:var(--accent)">0%</div></div>
+        <div class="ti"><div class="til">TP : SL</div><div class="tiv" id="trat" style="color:var(--silver)">1:2</div></div>
+      </div>
+      <button class="tfbtn" onclick="showEm()">&#x2705;&nbsp; أغلقت التارقت اليومي!</button>
+    </div>
+  </div>
+
+  <div class="panel cpanel">
+    <div class="ptitle">&#x1F4CA; منحنى النمو التراكمي</div>
+    <canvas id="gc" height="148"></canvas>
+  </div>
+
+  <div class="panel tpanel">
+    <div class="throw">
+      <h3>الخطة التراكمية التفصيلية</h3>
+      <span class="tbadge" id="tbadge">XAU/USD ذهب</span>
+    </div>
+    <table>
+      <thead><tr><th>الأسبوع</th><th>اليوم</th><th>رأس المال</th><th>نسبة الربح</th><th>الربح</th><th>اللوت</th><th>الرصيد الجديد</th></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="disc">&#x26A0;&#xFE0F; الأداة للأغراض التعليمية فقط. التداول ينطوي على مخاطر. الأرقام تقديرية وليست ضماناً للربح.</div>
+</div>
+
+<canvas id="cc"></canvas>
+
+<div class="eov" id="eov">
+  <div class="emod">
+    <button class="ecl" onclick="closeEm()">&#x2715;</button>
+    <span class="eemj" id="eemj">&#x1F3C6;</span>
+    <div class="etitle" id="etitle">أحسنت!</div>
+    <div class="esub" id="esub">التارقت اكتمل.</div>
+    <div class="estats">
+      <div class="estat"><div class="esv2" id="epf">+$0</div><div class="esl2">ربح اليوم</div></div>
+      <div class="estat"><div class="esv2" id="epr">0%</div><div class="esl2">عائد اليوم</div></div>
+      <div class="estat"><div class="esv2">A+</div><div class="esl2">الانضباط</div></div>
+    </div>
+    <div class="equote" id="equote">"الصبر والانضباط يصنعان المتداول الناجح."</div>
+  </div>
+</div>
+
+<script>
+const ASSETS = {
+  'XAU/USD ذهب':{ safe:[0.5,1.0],mid:[1.0,1.8],high:[2.0,3.5],pip:10,sl:{safe:15,mid:20,high:25} },
+  'XAG/USD فضة':{ safe:[0.4,0.9],mid:[0.9,1.6],high:[1.8,3.0],pip:5, sl:{safe:20,mid:28,high:38} },
+  'WTI نفط':    { safe:[0.4,0.8],mid:[0.8,1.5],high:[1.5,2.8],pip:10,sl:{safe:20,mid:28,high:38} },
+  'EUR/USD':     { safe:[0.3,0.7],mid:[0.7,1.3],high:[1.3,2.2],pip:10,sl:{safe:20,mid:30,high:40} },
+  'GBP/USD':     { safe:[0.3,0.8],mid:[0.8,1.4],high:[1.4,2.4],pip:10,sl:{safe:20,mid:30,high:40} },
+  'USD/JPY':     { safe:[0.3,0.7],mid:[0.7,1.2],high:[1.2,2.0],pip:9, sl:{safe:20,mid:30,high:40} },
+};
+const MODES = {
+  safe:{ icon:'🛡️',name:'آمن',range:'0.5%–1%/يوم',  riskPct:1,  stopPct:0.02,ratio:'1:2',   color:'0,229,160' },
+  mid: { icon:'⚖️',name:'متوسط',range:'1%–2%/يوم', riskPct:2,  stopPct:0.03,ratio:'1:1.5', color:'240,201,107' },
+  high:{ icon:'🔥',name:'عالي المخاطرة',range:'2%–3.5%/يوم',riskPct:3.5,stopPct:0.05,ratio:'1:1',color:'255,107,138' },
+};
+const TIER_CFG = [
+  {k:'safe',ico:'🛡️',lbl:'آمن',rp:1,  clr:'#00E5A0'},
+  {k:'mid', ico:'⚖️',lbl:'متوسط',rp:2, clr:'#F0C96B'},
+  {k:'high',ico:'🔥',lbl:'عالي المخاطرة',rp:3.5,clr:'#FF6B8A'},
+];
+const EMOTIONS = {
+  safe:[['🛡️','يوم آمن ومكتمل!','حافظت على رأس مالك وحققت هدفك. هذا هو الطريق الصح.'],['🏆','المتداول الصبور يكسب دائماً!','الثروة تُبنى بخطوات صغيرة ثابتة مثل خطوتك اليوم.']],
+  mid: [['⚖️','توازن مثالي!','حققت التارقت بمخاطرة محسوبة. هذا يعني أنك تتداول بحكمة.'],['💎','العقل قبل العاطفة!','إغلاقك في الوقت الصح علامة على نضج حقيقي.']],
+  high:[['🔥','عبقري المخاطرة!','تجاوزت التحدي وأغلقت بالربح. القوة مع الانضباط = نجاح.'],['🚀','الجرأة المحسوبة كسبت!','عالي المخاطرة لا يعني بلا خطة — وأنت أثبتت هذا.']],
+};
+const QUOTES=['"الصبر والانضباط يصنعان المتداول الناجح — ليس الحظ."','"السوق يكافئ من يتحكم في نفسه أكثر ممن يتحكم في السوق."','"كل إغلاق رابح هو خطوة نحو الحرية المالية."','"رأس المال محفوظ + تارقت مكتمل = يوم مثالي."'];
+const DAYS=['الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة'];
+let mode='safe', asset='XAU/USD ذهب', chartInst=null, _rate=0.75, _cap=300, canim=null;
+
+function enterMode(m) {
+  mode = m;
+  document.body.className = 'm-'+m;
+  document.getElementById('sw').classList.remove('on');
+  const sd = document.getElementById('sd');
+  sd.classList.add('on');
+  const M = MODES[m];
+  document.getElementById('pi').textContent  = M.icon;
+  document.getElementById('pn').textContent  = M.name;
+  document.getElementById('pr2').textContent = M.range;
+  calc();
+  window.scrollTo(0,0);
+}
+function goBack() {
+  document.getElementById('sd').classList.remove('on');
+  document.getElementById('sw').classList.add('on');
+}
+function setAsset(btn,name) {
+  document.querySelectorAll('.atab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  asset = name;
+  document.getElementById('tbadge').textContent = name;
+  calc();
+}
+function lot(cap,rp,sl,pip) { return Math.max(0.01,Math.round(cap*(rp/100)/(sl*pip)*100)/100); }
+function rate(w,d,wks) {
+  const rng=ASSETS[asset][mode], g=parseFloat(document.getElementById('growth').value)/100;
+  const m2=1+g*w/Math.max(wks-1,1), lo=rng[0]*m2, hi=rng[1]*m2;
+  return lo+(hi-lo)*(0.5+0.5*Math.sin((w*5+d)/3.7));
+}
+
+function renderLots(cap) {
+  const a=ASSETS[asset], c=document.getElementById('lotrows');
+  c.innerHTML='';
+  TIER_CFG.forEach(t=>{
+    const l=lot(cap,t.rp,a.sl[t.k],a.pip), ra=(cap*t.rp/100).toFixed(1), active=t.k===mode;
+    const div=document.createElement('div');
+    div.className='lot-row';
+    div.style.opacity=active?'1':'0.38';
+    div.style.transform=active?'scale(1.01)':'scale(1)';
+    div.innerHTML=`
+      <div class="lrl">
+        <span class="lico">${t.ico}</span>
+        <div>
+          <div class="lnm" style="color:${t.clr}">${t.lbl}${active?' &#x2190; نمطك':''}</div>
+          <div class="lra">مخاطرة: $${ra} | SL: ${a.sl[t.k]} نقطة</div>
+        </div>
+      </div>
+      <div style="text-align:left">
+        <div class="lv" style="color:${t.clr}">${l.toFixed(2)}</div>
+        <div class="lvs">لوت</div>
+      </div>`;
+    c.appendChild(div);
+  });
+}
+
+function calc() {
+  const init=parseFloat(document.getElementById('capital').value)||300;
+  const wks=parseInt(document.getElementById('weeks').value)||4;
+  const M=MODES[mode], a=ASSETS[asset];
+  let cap=init, tp=0, bd=0;
+  const lbl=['البداية'], dat=[cap];
+  const tb=document.getElementById('tbody');
+  tb.innerHTML='';
+  _cap=init;
+  _rate=rate(0,2,wks);
+  for(let w=0;w<wks;w++){
+    const sep=document.createElement('tr');
+    sep.innerHTML=`<td colspan="7" class="wsep" style="padding:5px 12px;text-align:right;">── الأسبوع ${w+1} ──</td>`;
+    tb.appendChild(sep);
+    for(let d=0;d<5;d++){
+      const r=rate(w,d,wks), pf=cap*(r/100), nc=cap+pf, l=lot(cap,M.riskPct,a.sl[mode],a.pip);
+      tp+=pf; if(pf>bd)bd=pf;
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td class="tdl">أسبوع ${w+1}</td><td class="tdl">${DAYS[d]}</td><td class="tdc">$${cap.toFixed(2)}</td><td class="tdr">${r.toFixed(2)}%</td><td class="tdp">+$${pf.toFixed(2)}</td><td class="tdlt">${l.toFixed(2)}</td><td class="tdt">$${nc.toFixed(2)}</td>`;
+      tb.appendChild(tr);
+      cap=nc; lbl.push(`أ${w+1}د${d+1}`); dat.push(cap);
+    }
+  }
+  const roi=(cap-init)/init*100;
+  document.getElementById('kf').textContent=`$${cap.toFixed(2)}`;
+  document.getElementById('kp').textContent=`+$${tp.toFixed(2)}`;
+  document.getElementById('kr').textContent=`${roi.toFixed(1)}%`;
+  document.getElementById('kb').textContent=`$${bd.toFixed(2)}`;
+  const dt=init*(_rate/100), ds=init*M.stopPct;
+  document.getElementById('tt').textContent=`+$${dt.toFixed(2)}`;
+  document.getElementById('ts').textContent=`-$${ds.toFixed(2)}`;
+  document.getElementById('trp').textContent=`${M.riskPct}%`;
+  document.getElementById('trat').textContent=M.ratio;
+  renderLots(init);
+  drawChart(lbl,dat);
+}
+
+function drawChart(lbl,dat){
+  const ctx=document.getElementById('gc').getContext('2d');
+  if(chartInst)chartInst.destroy();
+  const c=MODES[mode].color;
+  const g=ctx.createLinearGradient(0,0,0,240);
+  g.addColorStop(0,`rgba(${c},0.33)`); g.addColorStop(1,`rgba(${c},0)`);
+  chartInst=new Chart(ctx,{type:'line',data:{labels:lbl,datasets:[{data:dat,borderColor:`rgb(${c})`,backgroundColor:g,borderWidth:2.5,pointRadius:0,pointHoverRadius:5,pointHoverBackgroundColor:'#fff',tension:0.4,fill:true}]},options:{responsive:true,animation:{duration:350},plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(6,17,31,0.95)',borderColor:`rgba(${c},0.4)`,borderWidth:1,titleColor:`rgb(${c})`,bodyColor:'#fff',titleFont:{family:'Cairo',weight:'700'},bodyFont:{family:'Rajdhani',weight:'600',size:13},callbacks:{label:c=>' $'+c.raw.toFixed(2)}}},scales:{x:{ticks:{color:'rgba(155,176,200,0.4)',font:{size:8},maxTicksLimit:14},grid:{color:'rgba(255,255,255,0.03)'}},y:{ticks:{color:'rgba(155,176,200,0.5)',font:{family:'Rajdhani',size:10},callback:v=>'$'+v.toFixed(0)},grid:{color:'rgba(255,255,255,0.03)'}}}}});
+}
+
+function showEm(){
+  const pf=_cap*(_rate/100);
+  const pick=EMOTIONS[mode][Math.floor(Math.random()*EMOTIONS[mode].length)];
+  const q=QUOTES[Math.floor(Math.random()*QUOTES.length)];
+  document.getElementById('eemj').textContent=pick[0];
+  document.getElementById('etitle').textContent=pick[1];
+  document.getElementById('esub').textContent=pick[2];
+  document.getElementById('epf').textContent='+$'+pf.toFixed(2);
+  document.getElementById('epr').textContent=_rate.toFixed(2)+'%';
+  document.getElementById('equote').textContent=q;
+  document.getElementById('eov').classList.add('on');
+  startC();
+}
+function closeEm(){ document.getElementById('eov').classList.remove('on'); stopC(); }
+
+function startC(){
+  const cv=document.getElementById('cc'); cv.width=window.innerWidth; cv.height=window.innerHeight;
+  const ctx=cv.getContext('2d'), c=MODES[mode].color.split(',');
+  const cols=[`rgb(${c.join(',')})`,`rgba(${c.join(',')},0.6)`,'#fff','#F0C96B','rgba(255,255,255,0.4)'];
+  const ps=[];
+  for(let i=0;i<90;i++)ps.push({x:Math.random()*cv.width,y:Math.random()*-cv.height,w:5+Math.random()*7,h:6+Math.random()*10,col:cols[Math.floor(Math.random()*cols.length)],vy:2+Math.random()*4,vx:(Math.random()-0.5)*3,rot:Math.random()*360,rs:(Math.random()-0.5)*5});
+  function draw(){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    ps.forEach(p=>{ctx.save();ctx.translate(p.x+p.w/2,p.y+p.h/2);ctx.rotate(p.rot*Math.PI/180);ctx.fillStyle=p.col;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore();p.y+=p.vy;p.x+=p.vx;p.rot+=p.rs;if(p.y>cv.height){p.y=-20;p.x=Math.random()*cv.width;}});
+    canim=requestAnimationFrame(draw);
+  }
+  draw();
+}
+function stopC(){ if(canim)cancelAnimationFrame(canim); const cv=document.getElementById('cc'); cv.getContext('2d').clearRect(0,0,cv.width,cv.height); }
+</script>
+</body>
+</html>
